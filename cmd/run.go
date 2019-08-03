@@ -1,4 +1,5 @@
 // Copyright © 2018 coinpaprika.com
+// Copyright @ 2019 Veles Core 
 //
 // Licensed under the Apache License, version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +20,7 @@ import (
 	"net/http"
 
 	"github.com/coinpaprika/coinpaprika-api-go-client/coinpaprika"
-	"github.com/coinpaprika/telegram-bot/telegram"
+	"github.com/velescore/telegram-bot/telegram"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -43,7 +44,7 @@ var (
 	}
 
 	commandsProcessed = prometheus.NewCounter(prometheus.CounterOpts{
-		Namespace: "coinpaprika",
+		Namespace: "velescore",
 		Subsystem: "telegram_bot",
 		Name:      "commands_proccessed",
 		Help:      "The total number of processed commands",
@@ -94,17 +95,21 @@ func run() error {
 
 			text := `Please use one of the commands:
 
-			/start or /help 	show this message
-			/p <symbol> 		check the coin price
-			/s <symbol> 		check the circulating supply
-			/v <symbol> 		check the 24h volume
+			/h or /help 	  display help message
+			/p <symbol> 		info about coin price
+			/s <symbol> 		info about supply
+			/c <symbol> 		info about price change
+			/a <symbol>			info about ATH
 
-			/source 			show source code of this bot
 			`
 			log.Debugf("received command: %s", u.Message.Command())
 			switch u.Message.Command() {
-			case "source":
+			/*
+			case "author":
 				text = "https://github.com/coinpaprika/telegram-bot"
+			case "source":
+				text = "https://github.com/velescore/telegram-bot"
+			*/
 			case "p":
 				if text, err = commandPrice(u.Message.CommandArguments()); err != nil {
 					text = "invalid coin name|ticker|symbol, please try again"
@@ -115,8 +120,23 @@ func run() error {
 					text = "invalid coin name|ticker|symbol, please try again"
 					log.Error(err)
 				}
-			case "v":
+			/*case "v":
 				if text, err = commandVolume(u.Message.CommandArguments()); err != nil {
+					text = "invalid coin name|ticker|symbol, please try again"
+					log.Error(err)
+				}
+			case "m":
+				if text, err = commandMarketCap(u.Message.CommandArguments()); err != nil {
+					text = "invalid coin name|ticker|symbol, please try again"
+					log.Error(err)
+				}*/
+			case "a":
+				if text, err = commandAthPrice(u.Message.CommandArguments()); err != nil {
+					text = "invalid coin name|ticker|symbol, please try again"
+					log.Error(err)
+				}
+			case "c":
+				if text, err = commandPriceChange(u.Message.CommandArguments()); err != nil {
 					text = "invalid coin name|ticker|symbol, please try again"
 					log.Error(err)
 				}
@@ -150,11 +170,64 @@ func commandPrice(argument string) (string, error) {
 
 	priceUSD := ticker.Quotes["USD"].Price
 	priceBTC := ticker.Quotes["BTC"].Price
-	if ticker.Name == nil || ticker.ID == nil || priceUSD == nil || priceBTC == nil {
+	volumeUSD := ticker.Quotes["USD"].Volume24h
+	marketCapUSD := ticker.Quotes["USD"].MarketCap
+	marketCapBTC := ticker.Quotes["BTC"].MarketCap
+	if ticker.Name == nil || ticker.ID == nil || priceUSD == nil || priceBTC == nil || volumeUSD == nil || marketCapUSD == nil || marketCapBTC == nil {
 		return "", errors.Wrap(errors.New("missing data"), "command /p")
 	}
 
-	return fmt.Sprintf("%s price: %.8f USD, %.8f BTC \n\n http://coinpaprika.com/coin/%s", *ticker.Name, *priceUSD, *priceBTC, *ticker.ID), nil
+	return fmt.Sprintf(`%s price:
+		 %.4f $
+		 %.8f ₿
+	%s marketcap:
+		 %.f $
+		 %.f ₿
+	%s volume:
+		 %.f $
+  http://coinpaprika.com/coin/%s`,
+		*ticker.Name, *priceUSD, *priceBTC, *ticker.Symbol, *marketCapUSD, *marketCapBTC, *ticker.Symbol, *volumeUSD, *ticker.ID), nil
+}
+/*
+func commandMarketCap(argument string) (string, error) {
+	log.Debugf("processing command /m with argument :%s", argument)
+
+	ticker, err := getTickerByQuery(argument)
+	if err != nil {
+		return "", errors.Wrap(err, "command /m")
+	}
+
+	marketCapUSD := ticker.Quotes["USD"].MarketCap
+	marketCapBTC := ticker.Quotes["BTC"].MarketCap
+	if ticker.Name == nil || marketCapUSD == nil || marketCapBTC == nil {
+		return "", errors.Wrap(errors.New("missing data"), "command /m")
+	}
+
+	return fmt.Sprintf("%s marketcap information \n %.2f USD \n %.2f BTC", *ticker.Name, *marketCapUSD, *marketCapBTC), nil
+}
+*/
+func commandAthPrice(argument string) (string, error) {
+	log.Debugf("processing command /a with argument :%s", argument)
+
+	ticker, err := getTickerByQuery(argument)
+	if err != nil {
+		return "", errors.Wrap(err, "command /a")
+	}
+
+	athUSD := ticker.Quotes["USD"].ATHPrice
+	athBTC := ticker.Quotes["BTC"].ATHPrice
+	downFromAth := ticker.Quotes["USD"].PercentFromPriceATH
+	athDate := ticker.Quotes["USD"].ATHDate
+	if ticker.Name == nil || athDate == nil || athUSD == nil || athBTC == nil || downFromAth == nil {
+		return "", errors.Wrap(errors.New("missing data"), "command /a")
+	}
+
+	return fmt.Sprintf(`%s ATH info:
+		 %.4f $
+		 %.8f ₿
+		 %s
+		 Down since ATH %.2f %%`,
+		*ticker.Name, *athUSD, *athBTC, *athDate, *downFromAth), nil
 }
 
 func commandSupply(argument string) (string, error) {
@@ -165,13 +238,61 @@ func commandSupply(argument string) (string, error) {
 		return "", errors.Wrap(err, "command /s")
 	}
 
-	if ticker.Name == nil || ticker.ID == nil || ticker.CirculatingSupply == nil {
+	if ticker.Name == nil || ticker.MaxSupply == nil || ticker.TotalSupply == nil  || ticker.CirculatingSupply == nil || ticker.Symbol == nil {
 		return "", errors.Wrap(errors.New("missing data"), "command /s")
 	}
 
-	return fmt.Sprintf("%s circulating supply: %d \n\n http://coinpaprika.com/coin/%s", *ticker.Name, *ticker.CirculatingSupply, *ticker.ID), nil
+	return fmt.Sprintf(`%s supply info:
+		max supply: %d %s
+		total supply: %d %s
+		circ. supply: %d %s`,
+		*ticker.Name, *ticker.MaxSupply, *ticker.Symbol, *ticker.TotalSupply, *ticker.Symbol, *ticker.CirculatingSupply, *ticker.Symbol), nil
 }
+/*
+func commandMarkets(argument string) (string, error) {
+	log.Debugf("processing command /e with argument :%s", argument)
 
+	ticker, err := getTickerByQuery(argument)
+	market = string
+	if err != nil {
+		return "", errors.Wrap(err, "command /e")
+	}
+
+	if ticker.Name == nil || ticker.ID == nil {
+		return "", errors.Wrap(errors.New("missing data"), "command /e")
+	}
+
+	return fmt.Sprintf("%s is trading on: %d \n\n http://coinpaprika.com/coin/%s", market*ExchangeName, market*Pair, market*ReportedVolume24hShare ), nil
+}
+*/
+func commandPriceChange(argument string) (string, error) {
+	log.Debugf("processing command /c with argument :%s", argument)
+
+	ticker, err := getTickerByQuery(argument)
+	if err != nil {
+		return "", errors.Wrap(err, "command /c")
+	}
+
+	priceChange1h := ticker.Quotes["USD"].PercentChange1h
+	priceChange12h := ticker.Quotes["USD"].PercentChange12h
+	priceChange24h := ticker.Quotes["USD"].PercentChange24h
+	priceChange7d := ticker.Quotes["USD"].PercentChange7d
+	priceChange30d := ticker.Quotes["USD"].PercentChange30d
+	priceChange1y := ticker.Quotes["USD"].PercentChange1y
+	if ticker.Name == nil || priceChange1h == nil || priceChange12h == nil || priceChange24h == nil {
+		return "", errors.Wrap(errors.New("missing data"), "command /c")
+	}
+
+	return fmt.Sprintf(`%s price change:
+		 1h:  %.2f %%
+		 12h:  %.2f %%
+		 24h:  %.2f %%
+		 7d:  %.2f %%
+		 30d:  %.2f %%
+		 1y:  %.2f %%`,
+		 *ticker.Name, *priceChange1h, *priceChange12h, *priceChange24h, *priceChange7d, *priceChange30d, *priceChange1y), nil
+}
+/*
 func commandVolume(argument string) (string, error) {
 	log.Debugf("processing command /v with argument :%s", argument)
 
@@ -185,9 +306,9 @@ func commandVolume(argument string) (string, error) {
 		return "", errors.Wrap(errors.New("missing data"), "command /v")
 	}
 
-	return fmt.Sprintf("%s 24h volume: %.2f USD \n\n http://coinpaprika.com/coin/%s", *ticker.Name, *volumeUSD, *ticker.ID), nil
+	return fmt.Sprintf("%s 24h volume: %.2f USD", *ticker.Name, *volumeUSD), nil
 }
-
+*/
 func getTickerByQuery(query string) (*coinpaprika.Ticker, error) {
 	paprikaClient := coinpaprika.NewClient(nil)
 
