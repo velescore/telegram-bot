@@ -1,31 +1,30 @@
-[![Release](https://img.shields.io/github/release/coinpaprika/telegram-bot.svg?branch=master)](https://github.com/coinpaprika/telegram-bot/releases) 
-[![Build Status](https://travis-ci.org/coinpaprika/telegram-bot.svg?branch=master)](https://travis-ci.org/coinpaprika/telegram-bot) 
-[![go-doc](https://godoc.org/github.com/coinpaprika/telegram-bot?status.svg)](https://godoc.org/github.com/coinpaprika/telegram-bot) 
-[![Go Report Card](https://goreportcard.com/badge/github.com/coinpaprika/telegram-bot)](https://goreportcard.com/report/github.com/coinpaprika/telegram-bot) 
-[![Followers](https://img.shields.io/twitter/follow/coinpaprika.svg?style=social&label=Follow)](https://twitter.com/coinpaprika)
+[![Release](https://img.shields.io/github/release/velescore/telegram-bot.svg?branch=master)](https://github.com/velescore/telegram-bot/releases) 
+[![Build Status](https://travis-ci.org/velescore/telegram-bot.svg?branch=master)](https://travis-ci.org/velescore/telegram-bot) 
+[![go-doc](https://godoc.org/github.com/velescore/telegram-bot?status.svg)](https://godoc.org/github.com/velescore/telegram-bot) 
+[![Go Report Card](https://goreportcard.com/badge/github.com/velescore/telegram-bot)](https://goreportcard.com/report/github.com/velescore/telegram-bot) 
+[![Followers](https://img.shields.io/twitter/follow/velescore.svg?style=social&label=Follow)](https://twitter.com/velescore)
 
-# Coinpaprika telegram bot
+# Velescore telegram bot
 
 ## Commands
 
 ```
-   /start or /help  show this message
-   /p <symbol>      check the coin price
-   /s <symbol>      check the circulating supply
-   /v <symbol>      check the 24h volume
-   /source          show source code of this bot
+      /h or /help 	  display help message
+		/p <symbol> 	  info about coin price
+		/s <symbol> 	  info about supply
+		/c <symbol> 	  info about price change
+		/a <symbol>		  info about ATH
 ```   
 
 ## Telegram address 
-https://t.me/CoinpaprikaBot
-
+https://t.me/Velescore
 ## Binary releases
-https://github.com/coinpaprika/telegram-bot/releases
+https://github.com/velescore/telegram-bot/releases
 
 ## Building project from source
 
 ```
-git clone git@github.com:coinpaprika/telegram-bot.git
+git clone git@github.com:velesscore/telegram-bot.git
 cd telegram-bot/
 make 
 ```
