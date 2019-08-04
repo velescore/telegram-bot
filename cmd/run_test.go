@@ -20,12 +20,12 @@ func (suite *RunTestSuite) TestCommandPrice() {
 		contains string
 		error    bool
 	}{
-		"btc": {
-			contains: "Bitcoin",
+		"vls": {
+			contains: "Veles",
 			error:    false,
 		},
-		"Bitcoin": {
-			contains: "Bitcoin",
+		"Veles": {
+			contains: "Veles",
 			error:    false,
 		},
 		"Invalid_coin": {
@@ -49,14 +49,49 @@ func (suite *RunTestSuite) TestCommandPrice() {
 	}
 }
 
+func (suite *RunTestSuite) TestCommandAthPrice() {
+	tests := map[string]struct {
+		contains string
+		error    bool
+	}{
+		"vls": {
+			contains: "Veles",
+			error:    false,
+		},
+		"Veles": {
+			contains: "Veles",
+			error:    false,
+		},
+		"Invalid_coin": {
+			contains: "",
+			error:    true,
+		},
+	}
+
+	for s, r := range tests {
+		result, err := commandAthPrice(s)
+
+		if !r.error {
+			suite.NoError(err)
+		} else {
+			suite.Error(err)
+		}
+
+		if r.contains != "" {
+			suite.Contains(result, r.contains)
+		}
+	}
+}
+
+
 func (suite *RunTestSuite) TestCommandSupply() {
 	tests := map[string]struct {
 		error bool
 	}{
-		"btc": {
+		"vls": {
 			error: false,
 		},
-		"Bitcoin": {
+		"Veles": {
 			error: false,
 		},
 		"Invalid_coin": {
@@ -83,6 +118,40 @@ func (suite *RunTestSuite) TestCommandSupply() {
 	}
 }
 
+func (suite *RunTestSuite) TestCommandPriceChange() {
+	tests := map[string]struct {
+		contains string
+		error    bool
+	}{
+		"vls": {
+			contains: "Veles",
+			error:    false,
+		},
+		"Veles": {
+			contains: "Veles",
+			error:    false,
+		},
+		"Invalid_coin": {
+			contains: "",
+			error:    true,
+		},
+	}
+
+	for s, r := range tests {
+		result, err := commandPriceChange(s)
+
+		if !r.error {
+			suite.NoError(err)
+		} else {
+			suite.Error(err)
+		}
+
+		if r.contains != "" {
+			suite.Contains(result, r.contains)
+		}
+	}
+}
+/*
 func (suite *RunTestSuite) TestCommandVolume() {
 	tests := map[string]struct {
 		error bool
@@ -116,6 +185,7 @@ func (suite *RunTestSuite) TestCommandVolume() {
 		}
 	}
 }
+*/
 
 func TestRunTestSuite(t *testing.T) {
 	suite.Run(t, new(RunTestSuite))
