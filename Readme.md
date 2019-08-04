@@ -1,5 +1,5 @@
 [![Release](https://img.shields.io/github/release/velescore/telegram-bot.svg?branch=master)](https://github.com/velescore/telegram-bot/releases) 
-[![Build Status](https://travis-ci.org/velescore/telegram-bot.svg?branch=master)](https://travis-ci.org/velescore/telegram-bot) 
+[![Build Status](https://travis-ci.com/velescore/telegram-bot.svg?branch=master)](https://travis-ci.org/velescore/telegram-bot) 
 [![go-doc](https://godoc.org/github.com/velescore/telegram-bot?status.svg)](https://godoc.org/github.com/velescore/telegram-bot) 
 [![Go Report Card](https://goreportcard.com/badge/github.com/velescore/telegram-bot)](https://goreportcard.com/report/github.com/velescore/telegram-bot) 
 [![Followers](https://img.shields.io/twitter/follow/velescore.svg?style=social&label=Follow)](https://twitter.com/velescore)
