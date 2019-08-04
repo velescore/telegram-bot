@@ -9,11 +9,11 @@
 ## Commands
 
 ```
-      /h or /help 	  display help message
+	      	/h or /help 	  display help message
 		/p <symbol> 	  info about coin price
 		/s <symbol> 	  info about supply
 		/c <symbol> 	  info about price change
-		/a <symbol>		  info about ATH
+		/a <symbol>	  info about ATH
 ```   
 
 ## Telegram address 
